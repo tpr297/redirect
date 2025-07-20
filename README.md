@@ -1,2 +1,1 @@
-# redirect
-Static redirect page
+
