@@ -1,2 +1,2 @@
 # redirect
-Static redirect page to MEGA link
+Static redirect page
