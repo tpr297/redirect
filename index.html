@@ -15,11 +15,19 @@
           return;
         }
 
+        // Otvori sve linkove u novim tabovima
         links.forEach(link => {
           window.open(link, '_blank');
         });
 
-        document.body.innerHTML = "<h2>Links opened in new tabs.</h2>";
+        // Prikazivanje linkova na stranici
+        let linkListHTML = "<h2>Links opened in new tabs:</h2><ul>";
+        links.forEach(link => {
+          linkListHTML += `<li><a href="${link}" target="_blank">${link}</a></li>`;
+        });
+        linkListHTML += "</ul>";
+
+        document.body.innerHTML = linkListHTML;
 
       } catch (err) {
         document.body.innerHTML = "<h2>Error loading links.</h2>";
