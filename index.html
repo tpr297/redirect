@@ -4,11 +4,13 @@
   <meta charset="UTF-8">
   <title>Redirecting...</title>
   <script>
-    fetch("https://raw.githubusercontent.com/tpr297/redirect/main/link.txt
-")
+    fetch("https://raw.githubusercontent.com/tpr297/redirect/main/link.txt")
       .then(response => response.text())
       .then(link => window.location.href = link.trim())
-      .catch(err => document.body.innerHTML = "<h2>Error loading link.</h2>");
+      .catch(err => {
+        document.body.innerHTML = "<h2>Error loading link.</h2>";
+        console.error(err);
+      });
   </script>
 </head>
 <body>
