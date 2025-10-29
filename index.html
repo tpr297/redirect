@@ -1,35 +1,71 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>List of Links</title>
   <script>
-    async function displayLinks() {
+    const LINK_URL = "https://tpr297.github.io/redirect/link.txt";
+    const CACHE_KEY = "cachedLinks";
+    const CACHE_TIME_KEY = "cachedLinksTime";
+    const REFRESH_INTERVAL = 10 * 60 * 1000; // 10 minuta
+
+    async function fetchLinks(forceUpdate = false) {
+      const now = Date.now();
+      const lastUpdate = parseInt(localStorage.getItem(CACHE_TIME_KEY) || "0", 10);
+      const cachedLinks = JSON.parse(localStorage.getItem(CACHE_KEY) || "[]");
+
+      if (!forceUpdate && cachedLinks.length > 0 && now - lastUpdate < REFRESH_INTERVAL) {
+        renderLinks(cachedLinks, false, lastUpdate);
+        return;
+      }
+
       try {
-        const response = await fetch("https://raw.githubusercontent.com/tpr297/redirect/main/link.txt");
+        const response = await fetch(LINK_URL, { cache: "no-store" });
+        if (!response.ok) throw new Error("Failed to fetch links");
+
         const text = await response.text();
         const links = text.split(/\r?\n/).map(link => link.trim()).filter(link => link);
 
-        if (links.length === 0) {
-          document.body.innerHTML = "<h2>No links found.</h2>";
-          return;
+        if (links.length > 0) {
+          localStorage.setItem(CACHE_KEY, JSON.stringify(links));
+          localStorage.setItem(CACHE_TIME_KEY, now.toString());
         }
 
-        let linkListHTML = "<h2>Links:</h2><ul>";
-        links.forEach((link, index) => {
-          linkListHTML += `<li>${index + 1}: <a href="${link}" target="_blank">${link}</a></li>`;
-        });
-        linkListHTML += "</ul>";
-
-        document.body.innerHTML = linkListHTML;
+        renderLinks(links, true, now);
 
       } catch (err) {
-        document.body.innerHTML = "<h2>Error loading links.</h2>";
-        console.error(err);
+        console.error("Error fetching links:", err);
+        if (cachedLinks.length > 0) {
+          renderLinks(cachedLinks, false, lastUpdate);
+          document.body.innerHTML += "<p><i>(Offline mode: showing cached links)</i></p>";
+        } else {
+          document.body.innerHTML = "<h2>Error loading links.</h2><p>Try again later.</p>";
+        }
       }
     }
 
-    window.onload = displayLinks;
+    function renderLinks(links, updated, timestamp) {
+      if (links.length === 0) {
+        document.body.innerHTML = "<h2>No links found.</h2>";
+        return;
+      }
+
+      const date = new Date(timestamp);
+      const timeString = date.toLocaleString();
+
+      let html = `<h2>Links ${updated ? "(updated)" : "(cached)"}:</h2><ul>`;
+      links.forEach((link, index) => {
+        html += `<li>${index + 1}: <a href="${link}" target="_blank" rel="noopener noreferrer">${link}</a></li>`;
+      });
+      html += `</ul><p style="font-size:0.9em;color:#555;">Last updated: ${timeString}</p>`;
+
+      document.body.innerHTML = html;
+    }
+
+    window.onload = () => {
+      fetchLinks();
+      setInterval(() => fetchLinks(true), REFRESH_INTERVAL);
+    };
   </script>
 </head>
 <body>
