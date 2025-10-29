@@ -1,25 +1,46 @@
-addEventListener('fetch', event => {
-  event.respondWith(handleRequest(event.request))
-})
+const LINK_URL = "https://tpr297.github.io/redirect/link.txt";
+const CACHE_TTL = 10 * 60; 
 
-const LINK_URL = "https://tpr297.github.io/redirect/link.txt"
-const CACHE_DURATION = 10 * 60 
 
-async function handleRequest(request) {
-  const cache = caches.default
+let cachedLinks = null;
+let cachedAt = 0;
 
-  let response = await cache.match(LINK_URL)
-  if (response) {
-    return response
+export default {
+  async fetch(request, env) {
+    const now = Date.now();
+
+    
+    if (cachedLinks && now - cachedAt < CACHE_TTL * 1000) {
+      return new Response(cachedLinks, {
+        headers: { "Content-Type": "text/plain" }
+      });
+    }
+
+    try {
+      const response = await fetch(LINK_URL, { cf: { cacheTtl: 0 } });
+      if (!response.ok) throw new Error("Failed to fetch links");
+
+      const text = await response.text();
+      cachedLinks = text;
+      cachedAt = now;
+
+      return new Response(text, {
+        headers: { "Content-Type": "text/plain" }
+      });
+    } catch (err) {
+      console.error("Worker fetch error:", err);
+
+      if (cachedLinks) {
+        // Vrati stari keš ako fetch nije uspeo
+        return new Response(cachedLinks, {
+          headers: { "Content-Type": "text/plain" }
+        });
+      }
+
+      return new Response("Error loading links. Try again later.", {
+        status: 500,
+        headers: { "Content-Type": "text/plain" }
+      });
+    }
   }
-
-  try {
-    response = await fetch(LINK_URL)
-    const responseClone = new Response(response.body, response)
-    responseClone.headers.append("Cache-Control", `max-age=${CACHE_DURATION}`)
-    event.waitUntil(cache.put(LINK_URL, responseClone.clone()))
-    return response
-  } catch (err) {
-    return new Response("Error fetching links.", { status: 500 })
-  }
-}
+};
