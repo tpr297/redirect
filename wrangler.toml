@@ -1,7 +1,0 @@
-name = "proxy"
-type = "javascript"
-account_id = "4637df8276e450f8bf328a787899c81f"
-workers_dev = true
-route = ""
-zone_id = ""
-compatibility_date = "2025-10-29"
