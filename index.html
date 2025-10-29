@@ -4,8 +4,7 @@
   <meta charset="UTF-8">
   <title>List of Links</title>
   <script>
-   
-    const LINK_URL = "https://tpr297.github.io/redirect/";
+    const LINK_URL = "https://tpr297.github.io/redirect/link.txt";
     const CACHE_KEY = "cachedLinks";
     const CACHE_TIME_KEY = "cachedLinksTime";
     const REFRESH_INTERVAL = 10 * 60 * 1000; 
@@ -15,6 +14,7 @@
       const lastUpdate = parseInt(localStorage.getItem(CACHE_TIME_KEY) || "0", 10);
       const cachedLinks = JSON.parse(localStorage.getItem(CACHE_KEY) || "[]");
 
+     
       if (!forceUpdate && cachedLinks.length > 0 && now - lastUpdate < REFRESH_INTERVAL) {
         renderLinks(cachedLinks);
         return;
@@ -59,9 +59,6 @@
         html += `<li>${index + 1}: <a href="${link}" target="_blank" rel="noopener noreferrer">${link}</a></li>`;
       });
       html += "</ul>";
-
-     
-      html += `<p><a href="${LINK_URL}" target="_blank">Open Links</a></p>`;
 
       document.body.innerHTML = html;
     }
