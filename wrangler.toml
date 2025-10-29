@@ -1,4 +1,4 @@
-name = "proxy"
+name = "worker"
 type = "javascript"
 account_id = "4637df8276e450f8bf328a787899c81f"
 workers_dev = true
